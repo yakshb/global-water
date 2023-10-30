@@ -2,6 +2,7 @@ streamlit
 pandas
 pydeck 
 openai
+matplotlib
 altair
 folium
 streamlit-folium
