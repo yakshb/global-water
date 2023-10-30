@@ -1,6 +1,5 @@
 import streamlit as st
 import folium
-import matplotlib.pyplot as plt
 import altair as alt
 from streamlit_folium import st_folium, folium_static
 import geopandas as gpd
