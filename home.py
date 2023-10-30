@@ -289,3 +289,9 @@ with comparison_tab:
         st.altair_chart(chart, use_container_width=True)
     else:
         st.warning("Please select at least one country to display the data.")
+
+
+with global_tab:
+    metric_select = st.selectbox("Select a Metric", list(metric_colors.keys()))
+
+    st.warning("Section under Construction - Check back in for updates")
