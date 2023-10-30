@@ -1,13 +1,12 @@
 # Water Scarcity Tracker using Prophet
 
-# Simple AI-Enabled Document Q&A App
+## Purpose of the Project:
 
-An intuitive AI-powered tool to extract and interact with textual data from PDF documents. Utilizing Langchain, OpenAI's Large Language Models, and Streamlit, this app is capable of reading, processing, and answering queries based on the content of uploaded PDF documents.
+The Global Water Scarcity Tracker aims to provide an interactive and visual representation of the current and predicted water scarcity across the globe. Water scarcity is becoming an increasing global concern due to various reasons like population growth, urbanization, and rising agricultural demands. This tool serves as a comprehensive platform to understand, visualize, predict and track the dynamics of freshwater availability across countries over time using Facebook's Prophet ML forecasting tool.
 
 ## Table of Contents
 
 - [Features](#features)
-- [Usage](#usage)
 - [Privacy and Terms of Use](#privacy-and-terms-of-use)
 - [Contributing](#contributing)
 - [Contact](#contact)
@@ -15,11 +14,26 @@ An intuitive AI-powered tool to extract and interact with textual data from PDF 
 
 ## Features
 
-- TBU
+1. Dynamic Choropleth Map:
 
-## Usage
+An interactive map powered by Folium, showcasing global freshwater availability. The map provides detailed pop-ups for each country, giving insights into various metrics.
 
-- TBU
+2. Country-Specific Analysis:
+
+Users can select any country and visualize its freshwater resource metrics over time. This can provide deep insights into how freshwater availability has evolved for a particular nation.
+
+3. Comparative Visualization:
+
+Users have the option to select multiple countries and view a comparative analysis of their freshwater metrics. This feature helps in understanding relative differences and trends between nations.
+
+4. Predictive Insights:
+
+The application not only presents historical data but also offers predictive insights post-2020 up to 2049, helping users understand future trends and scenarios.
+
+5. User Experience Enhancements:
+
+The application employs a combination of visual aids, such as color-coded graphs, tooltips, and detailed legends, ensuring that the data interpretation is intuitive and user-friendly. 
+
 
 ## Privacy and Terms of Use
 
