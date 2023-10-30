@@ -14,25 +14,25 @@ The Global Water Scarcity Tracker aims to provide an interactive and visual repr
 
 ## Features
 
-1. Dynamic Choropleth Map:
+**1. Dynamic Choropleth Map:**
 
-An interactive map powered by Folium, showcasing global freshwater availability. The map provides detailed pop-ups for each country, giving insights into various metrics.
+    An interactive map powered by Folium, showcasing global freshwater availability. The map provides detailed pop-ups for each country, giving insights into various metrics.
 
-2. Country-Specific Analysis:
+**2. Country-Specific Analysis:**
 
-Users can select any country and visualize its freshwater resource metrics over time. This can provide deep insights into how freshwater availability has evolved for a particular nation.
+    Users can select any country and visualize its freshwater resource metrics over time. This can provide deep insights into how freshwater availability has evolved for a particular nation.
 
-3. Comparative Visualization:
+**3. Comparative Visualization:**
 
-Users have the option to select multiple countries and view a comparative analysis of their freshwater metrics. This feature helps in understanding relative differences and trends between nations.
+    Users have the option to select multiple countries and view a comparative analysis of their freshwater metrics. This feature helps in understanding relative differences and trends between nations.
 
-4. Predictive Insights:
+**4. Predictive Insights:**
 
-The application not only presents historical data but also offers predictive insights post-2020 up to 2049, helping users understand future trends and scenarios.
+    The application not only presents historical data but also offers predictive insights post-2020 up to 2049, helping users understand future trends and scenarios.
 
-5. User Experience Enhancements:
+**5. User Experience Enhancements:**
 
-The application employs a combination of visual aids, such as color-coded graphs, tooltips, and detailed legends, ensuring that the data interpretation is intuitive and user-friendly. 
+    The application employs a combination of visual aids, such as color-coded graphs, tooltips, and detailed legends, ensuring that the data interpretation is intuitive and user-friendly. 
 
 
 ## Privacy and Terms of Use
