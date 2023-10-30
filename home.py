@@ -11,7 +11,7 @@ import numpy as np
 st.set_page_config(
     page_title="Global Water Scarcity Tracker",
     page_icon="💧",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded"
     )
 
@@ -58,7 +58,6 @@ with st.expander("📈 How are predictions made?"):
     st.markdown("""
         """)
 
-
 with st.sidebar:
     st.subheader("Updates Required:", anchor=False)
     st.warning("""
@@ -102,7 +101,7 @@ def load_data():
     # Load GeoJSON file
     geo_data = gpd.read_file("data/predicted_data.geojson")
     # Load your CSV data
-    data = pd.read_csv("data/Water_usage_combined.csv")
+    water_data = pd.read_csv("data/Water_usage_combined.csv")
     return geo_data, data
 
 geo_data, data = load_data()
@@ -172,7 +171,7 @@ metric_colors = {
 
 with metrics_tab:
     # User can select a country
-    country_select = st.selectbox("Search for a Country", data['Country'].unique())
+    country_select = st.selectbox("Search for a Country", water_data['Country'].unique())
     
     # User can select a metric to visualize
     metric_select = st.selectbox("Select a Metric", list(metric_colors.keys()))
@@ -191,7 +190,7 @@ with metrics_tab:
     metric_column = metric_column_mapping[metric_select]
     
     # Filtering data based on selected country
-    selected_country_data = data[data['Country'] == country_select].dropna(subset=[metric_column])
+    selected_country_data = water_data[water_data['Country'] == country_select].dropna(subset=[metric_column])
     
     if not selected_country_data.empty:
         # Plotting the selected metric over time for the selected country using Altair
