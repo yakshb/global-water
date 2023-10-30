@@ -102,9 +102,9 @@ def load_data():
     geo_data = gpd.read_file("data/predicted_data.geojson")
     # Load your CSV data
     water_data = pd.read_csv("data/Water_usage_combined.csv")
-    return geo_data, data
+    return geo_data, water_data
 
-geo_data, data = load_data()
+geo_data, water_data = load_data()
 
 # Set the range of years for the slider
 min_year = 1975
@@ -112,7 +112,7 @@ max_year = int(geo_data["Year"].max())
 
 year = st.slider("Select a year:", min_year, max_year, value=2019)
 
-def create_choropleth_map(geo_data, data, year):
+def create_choropleth_map(geo_data, water_data, year):
     m = folium.Map(location=[20, 0], zoom_start=2, tiles="cartodb positron")
     
     year_data = geo_data[geo_data["Year"] == year]
@@ -154,7 +154,7 @@ def create_choropleth_map(geo_data, data, year):
 
     return m
 
-map_ = create_choropleth_map(geo_data, data, year)
+map_ = create_choropleth_map(geo_data, water_data, year)
 st_folium(map_, height=500, use_container_width=True)
 
 st.title("Analyze Countries and Key Metrics")
