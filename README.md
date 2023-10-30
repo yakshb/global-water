@@ -1,4 +1,4 @@
-# Water Scarcity Tracker using Prophet
+# Water Scarcity Tracker using Meta's Prophet Forecasting Model and Streamlit :balloon:
 
 ## Purpose of the Project:
 
