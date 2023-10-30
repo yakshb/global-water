@@ -292,6 +292,4 @@ with comparison_tab:
 
 
 with global_tab:
-    global_metric = st.selectbox("Select a Metric", list(metric_colors.keys()))
-
     st.warning("Section under Construction - Check back in for updates")
