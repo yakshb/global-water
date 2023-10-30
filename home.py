@@ -30,9 +30,6 @@ Water scarcity is an escalating global concern. As the demand for freshwater con
 
 **Transition of Water-Rich Countries:** Many water-rich countries are projected to become water-scarce by 2050.
 
----
-
-¹ [Name of the Source or Organization]
 """, icon="ℹ️")
 
 with st.expander("📈 How are predictions made?"):
