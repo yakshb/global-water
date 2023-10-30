@@ -101,7 +101,7 @@ with st.sidebar:
 @st.cache_data
 def load_data():
     # Load GeoJSON file
-    geo_data = gpd.read_file("predicted_data.geojson")
+    geo_data = gpd.read_file("data/predicted_data.geojson")
     # Load your CSV data
     data = pd.read_csv("data/Water_usage_combined.csv")
     return geo_data, data
