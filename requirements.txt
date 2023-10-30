@@ -1,0 +1,8 @@
+streamlit 
+pandas
+pydeck 
+openai
+altair
+folium
+streamlit-folium
+geopandas
