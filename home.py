@@ -5,6 +5,7 @@ from streamlit_folium import st_folium, folium_static
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import json
 
 # Page Configuration
 # Page configuration for Simple PDF App
@@ -100,11 +101,12 @@ with st.sidebar:
 def load_data():
     # Load GeoJSON file
     geo_data = gpd.read_file("data/predicted_data.geojson")
-    # Load your CSV data
-    water_data = pd.read_csv("data/Water_usage_combined.csv")
-    return geo_data, water_data
+    # Load the predictions data from the JSON file
+    with open("updated_all_country_predictions.json", 'r') as file:
+        predictions = json.load(file)
+    return geo_data, predictions
 
-geo_data, water_data = load_data()
+geo_data, predictions = load_data()
 
 # Set the range of years for the slider
 min_year = 1975
@@ -112,7 +114,7 @@ max_year = int(geo_data["Year"].max())
 
 year = st.slider("Select a year:", min_year, max_year, value=2019)
 
-def create_choropleth_map(geo_data, water_data, year):
+def create_choropleth_map(geo_data, predictions, year):
     m = folium.Map(location=[20, 0], zoom_start=2, tiles="cartodb positron")
     
     year_data = geo_data[geo_data["Year"] == year]
@@ -154,7 +156,7 @@ def create_choropleth_map(geo_data, water_data, year):
 
     return m
 
-map_ = create_choropleth_map(geo_data, water_data, year)
+map_ = create_choropleth_map(geo_data, predictions, year)
 st_folium(map_, height=500, use_container_width=True)
 
 st.title("Analyze Countries and Key Metrics")
@@ -164,50 +166,63 @@ metrics_tab, comparison_tab, global_tab = st.tabs(["Country Metrics", "Compare C
 metric_colors = {
     "Freshwater Resources Per Capita (m³)": 'steelblue',
     "Annual Freshwater Use (m³)": 'darkorange',
-    "Agriculture Freshwater Withdrawal (%)": 'forestgreen',
     "Population": 'firebrick',
-    "GDP Per Capita ($)": 'mediumpurple'
+    "GDP Per Capita ($) PPP": 'mediumpurple'
 }
 
 with metrics_tab:
     # User can select a country
-    country_select = st.selectbox("Search for a Country", water_data['Country'].unique())
+    countries_list = list(predictions.keys())
+    default_index = countries_list.index("World") if "World" in countries_list else 0
+
+    country_select = st.selectbox("Search for a Country", countries_list, index=default_index)
     
     # User can select a metric to visualize
-    metric_select = st.selectbox("Select a Metric", list(metric_colors.keys()))
+    metric_select = st.selectbox("Select a Metric", list(metric_colors.keys()), help="Metrics selected are predicted using the Prophet time series forecasting models and do not take envrionmental, social, and political factors into account. All metrics are viewed independently.")
 
     st.divider()
     
-    # Mapping selected metric to the corresponding column in the dataframe
     metric_column_mapping = {
         "Freshwater Resources Per Capita (m³)": 'Freshwater_Resources_Per_Capita_m3',
         "Annual Freshwater Use (m³)": 'Annual_Freshwater_Use',
-        "Agriculture Freshwater Withdrawal (%)": 'Agriculture_Freshwater_Withdrawal_Percent',
         "Population": 'Historical_Population',
-        "GDP Per Capita ($)": 'GDP_Per_Capita'
+        "GDP Per Capita ($) PPP": 'GDP_Per_Capita'
     }
     
     metric_column = metric_column_mapping[metric_select]
     
-    # Filtering data based on selected country
-    selected_country_data = water_data[water_data['Country'] == country_select].dropna(subset=[metric_column])
+    # Fetching the predictions for the selected country and metric
+    selected_country_data = pd.DataFrame(predictions[country_select].get(metric_column, []))
     
     if not selected_country_data.empty:
-        # Plotting the selected metric over time for the selected country using Altair
+        # Plotting the predicted metric (yhat) over time for the selected country using Altair
         line = alt.Chart(selected_country_data).mark_line(color=metric_colors[metric_select]).encode(
-            x=alt.X('Year:O', axis=alt.Axis(title='Year', labelAngle=0)),
-            y=alt.Y(f'{metric_column}:Q', axis=alt.Axis(title=metric_select)),
+            x=alt.X('ds:O', axis=alt.Axis(title='Year', labelAngle=0)),
+            y=alt.Y(f'yhat:Q', axis=alt.Axis(title=metric_select)),
+        )
+        
+        # Shading between yhat_upper and yhat_lower
+        area = alt.Chart(selected_country_data).mark_area(opacity=0.3, color=metric_colors[metric_select]).encode(
+            x='ds:O',
+            y='yhat_upper:Q',
+            y2='yhat_lower:Q',
+            tooltip=alt.value(None)
         )
         
         points = alt.Chart(selected_country_data).mark_point(color=metric_colors[metric_select], size=30).encode(
-            x=alt.X('Year:O'),
-            y=alt.Y(f'{metric_column}:Q'),
-            tooltip=['Year', metric_column]
+            x=alt.X('ds:O', title='Year'),
+            y=alt.Y(f'yhat:Q', title=metric_select),
+            tooltip=[
+                alt.Tooltip('ds:O', title='Year'),
+                alt.Tooltip('yhat:Q', title=metric_select, format=".2f"),
+                alt.Tooltip('yhat_lower:Q', title='Lower Bound', format=".2f"),
+                alt.Tooltip('yhat_upper:Q', title='Upper Bound', format=".2f")
+            ]
         )
         
-        chart = (line + points).properties(
+        chart = (area + line + points).properties(
             title={
-                "text": f"{metric_select} Over Time for {country_select}",
+                "text": f"{metric_select} Predictions Over Time for {country_select}",
                 "fontSize": 16,
                 "fontWeight": "bold"
             },
@@ -221,64 +236,90 @@ with metrics_tab:
 
         st.altair_chart(chart, use_container_width=True)
     else:
-        st.warning(f"No data available for {metric_select} in {country_select}.")
+        st.warning(f"No predictions available for {metric_select} in {country_select}.")
+
 
 
 with comparison_tab:
     # Use a multiselect box to allow users to select multiple countries
-    country_select = st.multiselect("Search for Countries", geo_data['Country'].unique())
+    country_select = st.multiselect("Search for Countries", list(predictions.keys()))
+
+    col1, col2 = st.columns(2)
+
+    with col1: 
+        multi_metric_select = st.selectbox("Select Metric", list(metric_colors.keys()))
+
+    with col2:
+        analysis_type = st.selectbox("Select Analysis Type", ['Nominal', 'Cumulative', 'YoY Growth Rate (%)', '3Yr Avg. Growth Rate (%)'])
 
     st.subheader(" ")
 
+    # Map the selected metric to its appropriate column name
+    metric_column = metric_column_mapping[multi_metric_select]
+
     # If countries are selected
     if country_select:
-        filtered_data = geo_data[geo_data['Country'].isin(country_select)].copy()
-        filtered_data = filtered_data[['Country', 'Year', 'Freshwater_Resources_Per_Capita_m3']]
+        # Fetching the predictions for the selected countries and metric
+        all_selected_data = []
+        for country in country_select:
+            country_data = pd.DataFrame(predictions[country].get(metric_column_mapping[multi_metric_select], []))
+            country_data['Country'] = country
+            all_selected_data.append(country_data)
 
-        shade = alt.Chart(pd.DataFrame({'Year': [2020, 2050]})).mark_rect(opacity=0.4, color='lightgray').encode(
-            x='min(Year):O',
-            x2='max(Year):O',
+        filtered_data = pd.concat(all_selected_data)
+
+        print(filtered_data.columns)
+
+        if analysis_type == 'Cumulative':
+            filtered_data['yhat'] = filtered_data.groupby('Country')['yhat'].transform(lambda x: x - x.iloc[0])
+        elif analysis_type == 'YoY Growth Rate (%)':
+            filtered_data['yhat'] = filtered_data.groupby('Country')['yhat'].pct_change() * 100
+        elif analysis_type == '3Yr Avg. Growth Rate (%)':
+            filtered_data['yhat'] = filtered_data.groupby('Country')['yhat'].pct_change(periods=3) * 100
+
+
+        shade = alt.Chart(pd.DataFrame({'ds': [2020, 2040]})).mark_rect(opacity=0.4, color='lightgray').encode(
+            x='min(ds):O',
+            x2='max(ds):O',
             tooltip=alt.value(None),
         )
 
         base_chart = alt.Chart(filtered_data).encode(
-            x=alt.X('Year:O', title='Year'),
-            y=alt.Y('Freshwater_Resources_Per_Capita_m3:Q', title='Freshwater Resources Per Capita (m³)'),
+            x=alt.X('ds:O', title='Year'),
+            y=alt.Y('yhat:Q', title=multi_metric_select),
             color=alt.Color('Country:N', legend=alt.Legend(title="Country")),
-            tooltip=['Country', 'Year', 'Freshwater_Resources_Per_Capita_m3']
-        )
-        
-        # Solid line with points for historical data
-        historical_chart = base_chart.mark_line().encode(
-            x=alt.X('Year:O', title='Year'),
-            y=alt.Y('Freshwater_Resources_Per_Capita_m3:Q', title='Freshwater Resources Per Capita (m³)'),
-            color=alt.Color('Country:N', legend=alt.Legend(title="Country")),
-            tooltip=['Country', 'Year', 'Freshwater_Resources_Per_Capita_m3']
-        ).transform_filter(
-            alt.datum.Year <= 2020
-        ) + base_chart.mark_circle(size=30).transform_filter(
-            alt.datum.Year <= 2020
+            tooltip=['Country', alt.Tooltip('ds:O', title='Year'), alt.Tooltip('yhat:Q', title=multi_metric_select, format=".2f")]
         )
 
-        # Dotted line with points for predicted data
-        predicted_chart = base_chart.mark_line(strokeDash=[2, 2]).encode(
-            x=alt.X('Year:O', title='Year'),
-            y=alt.Y('Freshwater_Resources_Per_Capita_m3:Q', title='Freshwater Resources Per Capita (m³)'),
+        historical_chart = base_chart.mark_line().encode(
+            x=alt.X('ds:O', title='Year'),
+            y=alt.Y('yhat:Q', title=multi_metric_select),
             color=alt.Color('Country:N', legend=alt.Legend(title="Country")),
-            tooltip=['Country', 'Year', 'Freshwater_Resources_Per_Capita_m3']
+            tooltip=['Country', alt.Tooltip('ds:O', title='Year'), alt.Tooltip('yhat:Q', title=multi_metric_select, format=".2f")]
         ).transform_filter(
-            alt.datum.Year > 2019
+            alt.datum.ds <= 2020
         ) + base_chart.mark_circle(size=30).transform_filter(
-            alt.datum.Year > 2019
+            alt.datum.ds <= 2020
+        )
+
+        predicted_chart = base_chart.mark_line(strokeDash=[2, 2]).encode(
+            x=alt.X('ds:O', title='Year'),
+            y=alt.Y('yhat:Q', title=multi_metric_select),
+            color=alt.Color('Country:N', legend=alt.Legend(title="Country")),
+            tooltip=['Country', alt.Tooltip('ds:O', title='Year'), alt.Tooltip('yhat:Q', title=multi_metric_select, format=".2f")]
+        ).transform_filter(
+            alt.datum.ds > 2019
+        ) + base_chart.mark_circle(size=30).transform_filter(
+            alt.datum.ds > 2019
         )
 
         # Combining both charts
         chart = (shade + historical_chart + predicted_chart).properties(
             title={
-                "text": "Comparison of Freshwater Resources Per Capita Over Time",
+                "text": f"Comparison of {multi_metric_select} Over Time ({analysis_type})",
                 "fontSize": 18,
                 "fontWeight": "bold",
-                "subtitle": "Dotted lines represent predicted values post-2020 (Up to 2049).",
+                "subtitle": "Dotted lines and shaded area represent predicted values post-2020 (Up to 2040).",
                 "subtitleFontSize": 14,
                 "anchor": "start"
             },
