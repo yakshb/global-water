@@ -10,6 +10,9 @@ assets/
 merged_data.geojson
 world_countries.json
 all_country_predictions.json
+industry_usage.csv
+internal_usage.csv
+water_stress_transposed.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
