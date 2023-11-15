@@ -13,6 +13,7 @@ all_country_predictions.json
 industry_usage.csv
 internal_usage.csv
 water_stress_transposed.csv
+final_output.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

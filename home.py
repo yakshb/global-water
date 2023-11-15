@@ -1,5 +1,6 @@
 import streamlit as st
 import folium
+
 import altair as alt
 from streamlit_folium import st_folium, folium_static
 import geopandas as gpd
@@ -115,8 +116,11 @@ max_year = int(geo_data["Year"].max())
 year = st.slider("Select a year:", min_year, max_year, value=2019)
 
 def create_choropleth_map(geo_data, predictions, year):
-    m = folium.Map(location=[20, 0], zoom_start=2, tiles="cartodb positron")
-    
+    m = folium.Map(location=[20, 0], zoom_start=2, tiles=None)
+
+    # Add TileLayer with no_wrap set to True
+    folium.TileLayer('cartodb positron', no_wrap=True).add_to(m)
+
     year_data = geo_data[geo_data["Year"] == year]
     
     cap_value = 18000
