@@ -3,6 +3,6 @@ pandas
 matplotlib
 altair
 folium
-streamlit-folium
+streamlit-folium==0.15.1
 geopandas
 
