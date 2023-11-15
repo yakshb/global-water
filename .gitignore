@@ -1,18 +1,8 @@
 # directories and files
 app.py
 notebooks/
-data/annual-freshwater-withdrawals.csv
-data/global-freshwater-use.csv
-data/Water_usage_combined (w lat_lon).csv
-data/renewable-water-resources-per-capita.csv
-data/Water_usage_combined_for_map.csv
 assets/
-merged_data.geojson
-world_countries.json
-all_country_predictions.json
-industry_usage.csv
-internal_usage.csv
-water_stress_transposed.csv
+data/
 final_output.ipynb
 
 # Byte-compiled / optimized / DLL files

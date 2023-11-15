@@ -101,7 +101,7 @@ with st.sidebar:
 @st.cache_data
 def load_data():
     # Load GeoJSON file
-    geo_data = gpd.read_file("data/predicted_data.geojson")
+    geo_data = gpd.read_file("cleaned_all_countries_fcst.geojson")
     # Load the predictions data from the JSON file
     with open("updated_all_country_predictions.json", 'r') as file:
         predictions = json.load(file)
@@ -115,7 +115,7 @@ max_year = int(geo_data["Year"].max())
 
 year = st.slider("Select a year:", min_year, max_year, value=2019)
 
-def create_choropleth_map(geo_data, predictions, year):
+def create_choropleth_map(geo_data, year):
     m = folium.Map(location=[20, 0], zoom_start=2, tiles=None)
 
     # Add TileLayer with no_wrap set to True
@@ -124,12 +124,12 @@ def create_choropleth_map(geo_data, predictions, year):
     year_data = geo_data[geo_data["Year"] == year]
     
     cap_value = 18000
-    year_data['Adjusted_Freshwater'] = np.where(year_data['Freshwater_Resources_Per_Capita_m3'] > cap_value, cap_value, year_data['Freshwater_Resources_Per_Capita_m3'])
+    year_data['Adjusted_Freshwater'] = np.where(year_data['Freshwater_Resources_Per_Capita_m3_x'] > cap_value, cap_value, year_data['Freshwater_Resources_Per_Capita_m3_x'])
     
     bins = list(year_data['Adjusted_Freshwater'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1]))
 
     popup = folium.GeoJsonPopup(
-        fields=["Country", "Country_Code", "Annual_Freshwater_Use", "GDP_Per_Capita", "Freshwater_Resources_Per_Capita_m3"],
+        fields=["Country", "Country_Code", "Annual_Freshwater_Use_x", "GDP_Per_Capita_x", "Freshwater_Resources_Per_Capita_m3_x"],
         aliases=["Country:", "Country Code:", "Annual Freshwater Use:", "GDP Per Capita:", "Freshwater Availability (m^3/person/year):"],
         localize=True,
         sticky=False,
@@ -160,7 +160,7 @@ def create_choropleth_map(geo_data, predictions, year):
 
     return m
 
-map_ = create_choropleth_map(geo_data, predictions, year)
+map_ = create_choropleth_map(geo_data, year)
 st_folium(map_, height=500, use_container_width=True)
 
 st.title("Analyze Countries and Key Metrics")
