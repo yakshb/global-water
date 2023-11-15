@@ -121,10 +121,13 @@ def create_choropleth_map(geo_data, year):
     # Add TileLayer with no_wrap set to True
     folium.TileLayer('cartodb positron', no_wrap=True).add_to(m)
 
-    year_data = geo_data[geo_data["Year"] == year]
+    # Create a boolean mask for rows corresponding to the selected year
+    year_mask = geo_data["Year"] == year
     
     cap_value = 18000
-    year_data['Adjusted_Freshwater'] = np.where(year_data['Freshwater_Resources_Per_Capita_m3_x'] > cap_value, cap_value, year_data['Freshwater_Resources_Per_Capita_m3_x'])
+    geo_data.loc[year_mask, 'Adjusted_Freshwater'] = np.where(geo_data.loc[year_mask, 'Freshwater_Resources_Per_Capita_m3_x'] > cap_value, cap_value, geo_data.loc[year_mask, 'Freshwater_Resources_Per_Capita_m3_x'])
+
+    year_data = geo_data[year_mask]
     
     bins = list(year_data['Adjusted_Freshwater'].quantile([0, 0.2, 0.4, 0.6, 0.8, 1]))
 
